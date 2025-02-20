@@ -151,7 +151,7 @@
 
             // Fonction pour filtrer les livres
             searchInput.addEventListener('input', function() {
-                const query = searchInput.value.toLowerCase();
+                const query = searchInput.value.trim().toLowerCase();
                 fetch(`/api/books/filter?title=${query}&author=${query}&isbn=${query}`)
                     .then(response => {
                         if (!response.ok) {

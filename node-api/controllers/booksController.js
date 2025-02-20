@@ -100,17 +100,17 @@ exports.getFilteredBooks = (req, res) => {
     let query = 'SELECT * FROM books WHERE 1=1';
     const params = [];
 
-    if (title) {
+    if (title && title.trim() !== '') {
         query += ' AND title LIKE ?';
-        params.push(`%${title}%`);
+        params.push(`%${title.trim()}%`);
     }
-    if (author) {
+    if (author && author.trim() !== '') {
         query += ' AND author LIKE ?';
-        params.push(`%${author}%`);
+        params.push(`%${author.trim()}%`);
     }
-    if (isbn) {
+    if (isbn && isbn.trim() !== '') {
         query += ' AND isbn LIKE ?';
-        params.push(`%${isbn}%`);
+        params.push(`%${isbn.trim()}%`);
     }
 
     db.query(query, params, (err, results) => {
