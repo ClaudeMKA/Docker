@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Livres</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Ajoutez des styles personnalisés ici */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        .modal-active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Header -->
+    <header class="bg-gray-800 text-white py-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-bold">Bibliothèque en Ligne</h1>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="#" class="hover:underline">Accueil</a></li>
+                    <li><a href="#" class="hover:underline">Livres</a></li>
+                    <li><a href="#" class="hover:underline">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container mx-auto mt-10">
+        <h2 class="text-4xl font-bold mb-5 text-center">Gestion des Livres</h2>
+
+        <!-- Bouton pour ouvrir la modale d'ajout de livre -->
+        <div class="text-center mb-8">
+            <button id="openModalBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Ajouter un livre</button>
+        </div>
+
+        <!-- Champ de recherche pour filtrer les livres -->
+        <div class="mb-4">
+            <input type="text" id="searchInput" placeholder="Rechercher un livre..." class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <!-- Liste des livres -->
+        <div id="booksList" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Les livres seront insérés ici par JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modale pour ajouter un livre -->
+    <div id="addBookModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden justify-center items-center modal">
+        <div class="bg-white text-gray-900 rounded-lg p-8 w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-4">Ajouter un livre</h3>
+            <form id="bookForm" class="space-y-4">
+                <div>
+                    <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Titre</label>
+                    <input type="text" name="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="title" required>
+                </div>
+                <div>
+                    <label for="author" class="block text-gray-700 text-sm font-bold mb-2">Auteur</label>
+                    <input type="text" name="author" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="author" required>
+                </div>
+                <div>
+                    <label for="isbn" class="block text-gray-700 text-sm font-bold mb-2">ISBN</label>
+                    <input type="text" name="isbn" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="isbn">
+                </div>
+                <div>
+                    <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description</label>
+                    <textarea name="description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="description"></textarea>
+                </div>
+                <div>
+                    <label for="published_year" class="block text-gray-700 text-sm font-bold mb-2">Année de publication</label>
+                    <input type="number" name="published_year" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="published_year">
+                </div>
+                <div>
+                    <label for="image_url" class="block text-gray-700 text-sm font-bold mb-2">Lien de l'image</label>
+                    <input type="url" name="image_url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="image_url">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const booksList = document.getElementById('booksList');
+            const bookForm = document.getElementById('bookForm');
+            const addBookModal = document.getElementById('addBookModal');
+            const openModalBtn = document.getElementById('openModalBtn');
+            const searchInput = document.getElementById('searchInput');
+
+            // Fonction pour ouvrir la modale
+            openModalBtn.addEventListener('click', () => {
+                addBookModal.classList.add('modal-active');
+                addBookModal.classList.remove('hidden');
+            });
+
+            // Fonction pour fermer la modale
+            function closeModal() {
+                addBookModal.classList.remove('modal-active');
+                addBookModal.classList.add('hidden');
+            }
+
+            // Fonction pour charger les livres
+            function loadBooks() {
+                fetch('/api/books')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur HTTP: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!Array.isArray(data)) {
+                        throw new Error('Données inattendues');
+                    }
+                    displayBooks(data);
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des livres:', error);
+                    alert('Erreur lors du chargement des livres: ' + error.message);
+                });
+            }
+
+            // Fonction pour afficher les livres
+            function displayBooks(books) {
+                booksList.innerHTML = '';
+                books.forEach(book => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-800 p-4 rounded-lg shadow-lg';
+                    card.innerHTML = `
+                        <img src="${book.image_url}" alt="${book.title}" class="w-full h-48 object-cover rounded-t-lg">
+                        <div class="mt-4">
+                            <h3 class="text-xl font-bold">${book.title}</h3>
+                            <p class="text-gray-400">${book.author}</p>
+                            <p class="text-gray-400">${book.published_year}</p>
+                            <div class="mt-2 flex justify-between">
+                                <button class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded" onclick="editBook(${book.id})">Modifier</button>
+                                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded" onclick="deleteBook(${book.id})">Supprimer</button>
+                            </div>
+                        </div>
+                    `;
+                    booksList.appendChild(card);
+                });
+            }
+
+            // Fonction pour filtrer les livres
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.toLowerCase();
+                fetch(`/api/books/filter?title=${query}&author=${query}&isbn=${query}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur HTTP: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        displayBooks(data);
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors du filtrage des livres:', error);
+                        alert('Erreur lors du filtrage des livres: ' + error.message);
+                    });
+            });
+
+            // Fonction pour ajouter un livre
+            bookForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Empêche le rechargement de la page
+                const formData = new FormData(bookForm);
+                const bookData = {
+                    title: formData.get('title'),
+                    author: formData.get('author'),
+                    isbn: formData.get('isbn'),
+                    description: formData.get('description'),
+                    published_year: formData.get('published_year'),
+                    image_url: formData.get('image_url')
+                };
+
+                fetch('/api/books', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bookData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur HTTP: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    bookForm.reset(); // Réinitialise le formulaire
+                    closeModal();
+                    loadBooks(); // Recharge la liste des livres
+                })
+                .catch(error => {
+                    console.error('Erreur lors de l\'ajout du livre:', error);
+                    alert('Erreur lors de l\'ajout du livre: ' + error.message);
+                });
+            });
+
+            // Fonction pour supprimer un livre
+            window.deleteBook = function(id) {
+                fetch(`/api/books/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        loadBooks();
+                    } else {
+                        alert('Erreur lors de la suppression du livre');
+                    }
+                });
+            }
+
+            // Fonction pour éditer un livre (à compléter)
+            window.editBook = function(id) {
+                alert('Fonctionnalité de modification à implémenter');
+            }
+
+            // Charger les livres au démarrage
+            loadBooks();
+        });
+    </script>
+</body>
+</html>
