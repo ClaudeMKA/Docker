@@ -18,7 +18,7 @@ exports.getBookById = (req, res) => {
             return res.status(500).json({ error: 'Erreur serveur' });
         }
         if (results.length === 0) {
-            return res.status(404).json({ error: 'Livre non trouvé' });
+            return res.status(404).json({ error: 'Livre non trouvéd' });
         }
         res.json(results[0]);
     });
@@ -66,7 +66,7 @@ exports.updateBook = (req, res) => {
                 return res.status(500).json({ error: 'Erreur serveur' });
             }
             if (result.affectedRows === 0) {
-                return res.status(404).json({ error: 'Livre non trouvé' });
+                return res.status(404).json({ error: 'Livre non trouvéx' });
             }
             res.json({
                 id: req.params.id,
@@ -87,7 +87,7 @@ exports.deleteBook = (req, res) => {
                 return res.status(500).json({ error: 'Erreur serveur' });
             }
             if (result.affectedRows === 0) {
-                return res.status(404).json({ error: 'Livre non trouvé' });
+                return res.status(404).json({ error: 'Livre non trouvéy' });
             }
             res.status(204).send();
         }

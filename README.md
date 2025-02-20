@@ -17,6 +17,16 @@ Bibliothèque en Ligne est une application web moderne permettant de gérer une 
    ```
 
 2. **Configurer l'environnement** :
+   - Créez un fichier `.env` à la racine du projet avec le contenu suivant :
+     ```plaintext
+     MYSQL_ROOT_PASSWORD=root
+     MYSQL_DATABASE=db
+     MYSQL_USER=user
+     MYSQL_PASSWORD=password
+     API_PORT=3000
+     FRONTEND_PORT=80
+     DB_PORT=3306
+     ```
    - Assurez-vous que Docker est en cours d'exécution.
 
 3. **Lancez l'application** :
@@ -37,7 +47,7 @@ Bibliothèque en Ligne est une application web moderne permettant de gérer une 
 
 ## Conteneurs Docker
 
-- **db** : Utilise l'image `mysql:8.0.36` pour la base de données MySQL. Il initialise la base de données avec le script `init.sql` et expose le port 3306.
+- **db** : Utilise l'image `mysql:8.0.36` pour la base de données MySQL. Il initialise la base de données avec le script `init.sql` et expose le port défini dans le fichier `.env`.
 - **api** : Construit à partir du Dockerfile dans `node-api/`, ce conteneur exécute le serveur Node.js qui gère les requêtes API.
 - **frontend** : Construit à partir du Dockerfile dans `front-end/`, ce conteneur sert l'application front-end via Nginx.
 

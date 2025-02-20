@@ -176,7 +176,7 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Route non trouvée' });
 });
 
-const PORT = 3000;
+const PORT = process.env.API_PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Serveur démarré sur le port ${PORT}`);
 });
